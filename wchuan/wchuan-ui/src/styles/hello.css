@@ -1,0 +1,204 @@
+.hello-wrapper {
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at top left, #1e293b 0%, #0f172a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+.glass-container {
+    width: 500px;
+    /* 核心修改 1：限制最大高度，防止撑爆屏幕 */
+    max-height: 90vh;
+    min-height: 600px; /* 设置一个最小高度保证美观 */
+    display: flex;
+    flex-direction: column; /* 纵向排列 */
+
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: fadeIn 0.8s ease-out;
+}
+
+/* 顶部 Mac 装饰条固定 */
+.header-decoration {
+    flex-shrink: 0; /* 防止被压缩 */
+    padding: 15px 20px;
+    display: flex;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.red { background: #ff5f56; }
+.yellow { background: #ffbd2e; }
+.green { background: #27c93f; }
+
+/* 核心内容区 */
+.hello-content {
+    flex: 1; /* 核心修改 2：占据剩余的所有空间 */
+    display: flex;
+    flex-direction: column;
+    padding: 30px 40px;
+    text-align: center;
+    overflow: hidden; /* 防止外层容器出现滚动条 */
+}
+
+.status-icon-box {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+
+    /* 核心代码：使用 Flex 完美居中内容物 */
+    display: flex;
+    align-items: center;      /* 垂直居中 */
+    justify-content: center;   /* 水平居中 */
+}
+
+.shield-icon {
+    color: #4ade80;
+    z-index: 2;
+    position: relative;
+}
+
+.pulse-ring {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    border: 2px solid #4ade80;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.page-title {
+    flex-shrink: 0;
+    color: #f8fafc;
+    font-size: 24px;
+    font-weight: 300;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+}
+
+/* 结果卡片美化 */
+.result-card {
+    flex: 1; /* 核心修改 3：让卡片根据文字长度自动增长 */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4ade80;
+
+    /* 核心修改 4：如果文字实在太长，卡片内部开启滚动 */
+    overflow-y: auto;
+}
+
+/* 针对长句优化字体大小 */
+/* 修改原有的 .response-text 为容器属性 */
+.response-text {
+    width: 100%;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+}
+
+.quote-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* 名言主体：左对齐，主色调 */
+.quote-main {
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.5;
+    color: #4ade80;
+    text-align: left;
+    text-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+    word-break: break-word;
+}
+
+/* 作者：右下角对齐，样式略微弱化 */
+.quote-author {
+    align-self: flex-end; /* 核心代码：强制自己向右对齐 */
+    margin-top: 15px;
+    font-size: 18px;
+    font-weight: 400;
+    color: rgba(74, 222, 128, 0.8); /* 稍微透明一点 */
+    font-style: italic; /* 斜体增加雅致感 */
+}
+
+.dash {
+    opacity: 0.6;
+}
+
+/* 适配超长文本的卡片自适应 */
+.result-card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 16px;
+    padding: 30px; /* 增加内边距 */
+    margin-bottom: 20px;
+    border-left: 4px solid #4ade80;
+    overflow-y: auto;
+}
+
+.secure-tag {
+    margin-top: 15px;
+    font-size: 11px;
+    color: #64748b;
+    flex-shrink: 0;
+}
+
+/* 按钮区域固定在底部 */
+.action-group {
+    flex-shrink: 0; /* 核心修改 5：防止按钮被挤压 */
+    margin-top: auto; /* 确保始终在最下方 */
+    display: flex;
+    flex-direction: column;
+}
+
+.elegant-btn {
+    width: 100%;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border: none;
+    font-weight: 600;
+}
+
+.back-link {
+    margin-top: 15px;
+    color: #94a3b8 !important;
+}
+
+/* 动画定义 */
+@keyframes pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    70% { transform: scale(1.3); opacity: 0; }
+    100% { transform: scale(0.95); opacity: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-slide-enter-active, .fade-slide-leave-active {
+    transition: all 0.3s ease;
+}
+.fade-slide-enter-from { opacity: 0; transform: translateX(20px); }
+.fade-slide-leave-to { opacity: 0; transform: translateX(-20px); }

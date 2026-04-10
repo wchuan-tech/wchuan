@@ -1,0 +1,145 @@
+/* 全局基础重置 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 核心：全屏背景容器 */
+.index-container {
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+/* 磨砂卡片容器 */
+.glass-container {
+    width: 460px;
+    max-height: 90vh; /* 核心：限制最大高度 */
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px);
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2) !important;
+    overflow: hidden; /* 裁剪装饰边 */
+}
+
+/* Mac 风格标题栏 */
+.header-decoration {
+    padding: 15px 20px;
+    display: flex;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.02);
+    flex-shrink: 0;
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.red { background: #ff5f56; }
+.yellow { background: #ffbd2e; }
+.green { background: #27c93f; }
+
+/* 内容区域滚动控制 */
+.profile-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 30px 30px;
+    overflow: hidden; /* 由内部 el-scrollbar 处理滚动 */
+}
+
+.user-header {
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.user-name {
+    margin-top: 10px;
+    font-size: 24px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+/* --- 滚动条雅致化处理 --- */
+
+/* 1. 默认隐藏滚动条（透明度为0） */
+.info-scroll-wrapper :deep(.el-scrollbar__bar) {
+    opacity: 0 !important;
+    /* 增加平滑的过渡效果 */
+    transition: opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* 2. 当鼠标移入内容区时，显示滚动条 */
+.info-scroll-wrapper:hover :deep(.el-scrollbar__bar) {
+    opacity: 1 !important;
+}
+
+/* 3. 进一步美化滚动条滑块（thumb）的样式 */
+.info-scroll-wrapper :deep(.el-scrollbar__thumb) {
+    background-color: rgba(0, 0, 0, 0.15) !important; /* 更淡的灰色 */
+    border-radius: 10px;
+}
+
+.info-scroll-wrapper :deep(.el-scrollbar__thumb:hover) {
+    background-color: var(--primary) !important; /* 鼠标悬停滑块变蓝 */
+}
+
+/* 4. 解决滚动条占位导致的布局跳动（可选） */
+.info-scroll-wrapper :deep(.el-scrollbar__wrap) {
+    overflow-x: hidden; /* 强制禁用横向滚动 */
+}
+
+.cell-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+/* 按钮组固定在底部 */
+.footer-actions {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto; /* 核心：推向最下方 */
+    padding-top: 10px;
+}
+
+.main-btn, .back-btn {
+    width: 100% !important;
+    height: 48px !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    margin-left: 0 !important;
+}
+
+.back-btn {
+    background-color: #fff !important;
+    border: 1px solid #e2e8f0 !important;
+    color: #64748b !important;
+}
+
+.logout-link {
+    margin-top: 5px;
+    font-size: 13px !important;
+    color: #f56c6c !important;
+}
+
+/* 管理员样式 */
+.admin-auth-text { color: #f56c6c; font-weight: bold; }
+.perm-tags code {
+    background: #f1f5f9;
+    color: #4f46e5;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    border: 1px solid #e2e8f0;
+}
