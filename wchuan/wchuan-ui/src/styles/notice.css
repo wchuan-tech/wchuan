@@ -1,0 +1,164 @@
+.notice-container {
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at top right, #1e293b 0%, #0f172a 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 0; left: 0;
+}
+
+.notice-main-card {
+    width: 1000px;
+    height: 80vh;
+    border-radius: 24px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.notice-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* 左侧列表 */
+.notice-list-side {
+    flex: 1.5;
+    padding: 30px;
+    border-right: 1px solid #f1f5f9;
+}
+
+.side-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.notice-item-box {
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #e2e8f0;
+}
+
+.notice-title {
+    font-size: 18px;
+    color: #1e293b;
+    margin: 10px 0;
+}
+
+.notice-content {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.item-footer {
+    margin-top: 15px;
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    gap: 20px;
+}
+
+/* 右侧管理 */
+.notice-manage-side {
+    flex: 1;
+    padding: 30px;
+    background: #ffffff;
+}
+
+.manage-header h3 {
+    margin-bottom: 20px;
+    color: #4f46e5;
+}
+
+.publish-btn {
+    width: 100%;
+    height: 45px;
+    margin-top: 20px;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Mac dots 保持一致 */
+.header-decoration {
+    padding: 15px 20px;
+    display: flex;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.03);
+}
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.red { background: #ff5f56; }
+.yellow { background: #ffbd2e; }
+.green { background: #27c93f; }
+
+
+.side-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-btns {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.notice-item-box {
+    position: relative;
+    padding: 14px;
+    background: #f9fafc;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+}
+
+.notice-item-box.selectable {
+    cursor: pointer;
+    padding-left: 40px;
+}
+
+.notice-item-box.selected {
+    background: #e8f3ff !important;
+    border: 1px solid #409eff;
+}
+
+.check-circle {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+}
+
+.check-circle .inner {
+    width: 10px;
+    height: 10px;
+    background: #409eff;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.delete-bar {
+    margin-top: 10px;
+    padding: 8px 12px;
+    background: #f7f8fa;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

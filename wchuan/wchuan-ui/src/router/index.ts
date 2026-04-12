@@ -3,13 +3,17 @@ import Login from '../views/Login.vue'
 import Index from "../views/Index.vue"
 import UserProfile from '../views/UserProfile.vue'
 import Hello from '../views/Hello.vue'
+import Notice from '../views/Notice.vue'
+import Menu from '../views/Menu.vue'
 
 const routes: Array<RouteRecordRaw> = [
     { path: '/', redirect: '/index' },
     { path: '/login', component: Login },
     { path: '/index', component: Index },
     { path: '/profile', component: UserProfile },
-    { path: '/hello', component: Hello }
+    { path: '/hello', component: Hello },
+    { path: '/notice', component: Notice },
+    { path: '/menu', component: Menu}
 ]
 
 const router = createRouter({

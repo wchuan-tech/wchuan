@@ -21,7 +21,7 @@ public class HelloController {
 
     @Log(title = "测试接口") // 只需要加这一行！
     @GetMapping("/hello")
-    @PreAuthorize("@ss.hasPerm('system:test:list')")
+    @PreAuthorize("@ss.hasPerm('dev:test:run')")
     public ResponseResult<?> hello(){
         try {
             // 国内可访问的英文名言API

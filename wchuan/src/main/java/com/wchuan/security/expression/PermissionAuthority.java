@@ -12,6 +12,7 @@ public class PermissionAuthority {
     public boolean hasPerm(String permission){
         System.out.println("当前校验权限：" + permission);
         System.out.println("当前用户权限：" + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
+
         if(SecurityUtils.isAdmin())
             return true;
 

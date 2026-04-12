@@ -9,6 +9,8 @@ export interface Result<T = any> {
 export interface LoginResponse {
     token: string;
     // 如果后端还返回了用户信息，也可以写在这里
+    userId: number;
+    permissions: string[]; // 权限标识列表
 }
 
 export interface CaptchaResponse {
@@ -33,6 +35,24 @@ export interface SysNotice {
     title: string;
     content: string;
     type: string;        // '0' 为租户公告，'1' 为系统公告
+    tenantId: number,
+    tenantName: string,
     createTime: string;
     createBy?: string;
+}
+
+export interface SysMenu {
+    id?: number;
+    menuName: string;
+    parentId: number;
+    path: string;
+    component?: string;
+    visible?: string;
+    status?: string;
+    perms?: string;
+    icon?: string;
+    menuType: 'M' | 'C' | 'F'; // M: 目录, C: 菜单, F: 按钮
+    children?: SysMenu[];
+    createTime?: string;
+    orderNum?: number;
 }

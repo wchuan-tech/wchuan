@@ -84,7 +84,7 @@ import request from '../utils/request'
 import { useRouter } from 'vue-router'
 import {ElMessage, type FormInstance} from 'element-plus'
 import { User, Lock, Picture } from '@element-plus/icons-vue'
-import type { Result, LoginResponse, CaptchaResponse } from '../api/types'
+import type {Result, LoginResponse, CaptchaResponse, UserInfo} from '../api/types'
 
 const router = useRouter()
 // 3. 强类型定义 formRef，修复 TS 警告
@@ -152,37 +152,48 @@ const handleLogin = async () => {
 
   try {
     await formRef.value.validate()
-    const res = await request.post<any, Result<LoginResponse>>('/user/login', loginForm)
+
+    const res = await request
+        .post<any, Result<LoginResponse>>('/user/login', loginForm)
+
     if (res.code === 200) {
       ElMessage.success('登录成功')
       localStorage.setItem('token', res.data.token)
-      // 记住账号逻辑
-      if (rememberMe.value) {
+      // 立即调用获取用户信息接口
+      const infoRes = await request.get<any, Result<UserInfo>>('/user/getInfo')
+
+      if (infoRes.code === 200) {
+        // 4. 将 UserInfo 里的数据存入 localStorage，供 hasPerm 使用
+        localStorage.setItem('userId', infoRes.data.id.toString())
+        localStorage.setItem('permissions', JSON.stringify(infoRes.data.permissions || []))
+
         localStorage.setItem('rememberMe', 'true')
         localStorage.setItem('userAccount', loginForm.userName)
       } else {
         localStorage.removeItem('rememberMe')
         localStorage.removeItem('userAccount')
       }
-      router.push('/index')
+      await router.push('/index')
     } else {
       ElMessage.error(res.msg || '登录失败')
       loginForm.code = ''
-      getCaptcha()
-      nextTick(() => {
+      await getCaptcha()
+      await nextTick(() => {
         formRef.value?.clearValidate()
       })
     }
   } catch (err) {
     ElMessage.error('用户名或密码错误,请重试')
-    getCaptcha()
-    nextTick(() => {
+    await getCaptcha()
+    await nextTick(() => {
       formRef.value?.clearValidate()
     })
   } finally {
     loading.value = false
   }
 }
+
+
 </script>
 
 <style>

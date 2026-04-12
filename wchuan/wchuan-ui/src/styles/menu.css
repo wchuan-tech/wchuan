@@ -1,0 +1,73 @@
+.menu-main-card {
+    width: 1000px;
+    height: 85vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.search-bar {
+    margin-bottom: 15px;
+    width: 300px;
+}
+
+.custom-table {
+    border-radius: 12px;
+    overflow: hidden;
+    --el-table-header-bg-color: #f8fafc;
+}
+
+/* 优化树形缩进线 */
+:deep(.el-table__placeholder) {
+    width: 20px;
+}
+
+.dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* 弹窗雅致化 */
+:deep(.el-dialog) {
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+:deep(.el-dialog__header) {
+    margin-right: 0;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+/* 菜单类型标签样式优化 */
+.type-tag {
+    border-radius: 6px;
+    font-weight: bold;
+    min-width: 50px;
+    letter-spacing: 1px;
+    /* 增加微弱阴影增强层次感 */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 按钮标识代码美化 */
+:deep(.el-table .cell) code {
+    background: #f1f5f9;
+    color: #4f46e5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 12px;
+}
+
+/* 表格行的交互感 */
+.custom-table :deep(.el-table__row--level-0) {
+    background-color: #fafbfc; /* 顶级目录底色稍深，区分层级 */
+}

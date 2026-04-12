@@ -8,12 +8,14 @@ const request = axios.create({
     timeout: 5000
 })
 
+// 请求拦截器
 request.interceptors.request.use(
     (config: InternalAxiosRequestConfig) =>{
     const token = localStorage.getItem('token') // 从浏览器缓存拿 Token
     if(token && config.headers){
         config.headers['token'] = token // Header 的键名 'token' 必须和后端 JwtFilter 里的获取名一致
     }
+    // 处理完请求配置 返回给 axios
     return config
 },error => {
     return Promise.reject(error)
@@ -75,7 +77,7 @@ function handleUnauthorized() {
         ElMessage.error("登录已过期，请重新登录");
         localStorage.removeItem('token');
     }
-    // 强制跳转
+    // 强制跳转  跳转到登录页，并且不留下历史记录（不能点返回键回来）
     router.replace('/login');
 }
 

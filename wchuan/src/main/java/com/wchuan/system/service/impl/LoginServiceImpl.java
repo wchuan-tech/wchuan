@@ -55,6 +55,8 @@ public class LoginServiceImpl implements LoginService {
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
 
         String userId = loginUser.getUser().getId().toString();
+
+        System.out.println("loginUserAuthorities:" + loginUser.getAuthorities());
         // 设置用户登陆信息时间
         redisCache.setCacheObject(LOGIN_TOKEN_KEY + userId, loginUser,SESSION_TTL, TimeUnit.MINUTES);
 
@@ -64,7 +66,6 @@ public class LoginServiceImpl implements LoginService {
         String token = tokenService.createToken(loginUser);
         Map<String,String> map = new HashMap<>();
         map.put("token",token);
-
 
         return new ResponseResult<>(200,"登录成功",map);
     }

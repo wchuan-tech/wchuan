@@ -7,9 +7,32 @@
         <span>WCHUAN</span>
       </div>
       <el-menu default-active="/index" background-color="#0f172a" text-color="#94a3b8" active-text-color="#ffffff" router>
-        <el-menu-item index="/index"><el-icon><Grid /></el-icon><span>控制台概览</span></el-menu-item>
-        <el-menu-item index="/profile"><el-icon><User /></el-icon><span>个人中心</span></el-menu-item>
-        <el-menu-item index="/hello"><el-icon><Compass /></el-icon><span>权限测试中心</span></el-menu-item>
+        <!-- 【新增】左侧菜单栏：公告中心 -->
+        <el-menu-item index="/notice">
+          <el-icon><Notification /></el-icon>
+          <span>公告</span>
+        </el-menu-item>
+
+        <el-menu-item index="/index">
+          <el-icon><Grid /></el-icon>
+          <span>控制台概览</span>
+        </el-menu-item>
+
+        <!-- 【新增】菜单管理 -->
+        <el-menu-item index="/menu">
+          <el-icon><Setting /></el-icon>
+          <span>菜单权限管理</span>
+        </el-menu-item>
+
+        <el-menu-item index="/profile">
+          <el-icon><User /></el-icon>
+          <span>个人中心</span></el-menu-item>
+
+        <el-menu-item index="/hello">
+          <el-icon><Compass /></el-icon>
+          <span>权限测试中心</span>
+        </el-menu-item>
+
       </el-menu>
     </el-aside>
 
@@ -44,6 +67,15 @@
       </el-header>
 
       <el-main class="main-content">
+
+        <div class="tech-stack-tags">
+          <el-button type="primary" round @click="router.push('/notice')">
+            <el-icon><Notification /></el-icon>&nbsp;查看系统公告
+          </el-button>
+        </div>
+
+        <br>
+
         <!-- 欢迎区域：现在使用动态用户名 -->
         <div class="welcome-hero">
           <div class="hero-main-content">
@@ -58,6 +90,7 @@
                 欢迎回到系统管理后台，当前您的权限已通过 <span class="status-link">JWT 无状态认证</span> 校验。
               </p>
             </div>
+
 
             <!-- 标签区：移到文字下方，增加层次感 -->
             <div class="tech-stack-tags">
@@ -116,7 +149,8 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { Platform, Grid, User, Compass, ArrowDown, Operation} from '@element-plus/icons-vue'
+import {Platform, Grid, User, Compass,
+  ArrowDown, Operation, Notification, Setting} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import request from '../utils/request'
 import { type Result, type UserInfo } from '../api/types'
