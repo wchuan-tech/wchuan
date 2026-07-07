@@ -15,6 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.util.Arrays;
 import java.util.List;
 
+/*
+* 用于在 sql 语句后拼接租户id 判断
+*/
 @Configuration
 public class MybatisPlusConfig {
 
@@ -23,7 +26,10 @@ public class MybatisPlusConfig {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
 
         // 1. 添加多租户插件
-        interceptor.addInnerInterceptor(new TenantLineInnerInterceptor(new TenantLineHandler() {
+        interceptor.addInnerInterceptor(
+                new TenantLineInnerInterceptor(
+                        // TenantLineHandler 是一个接口 需要重写里面的方法
+                        new TenantLineHandler() {
             /**
              * 获取租户 ID 值表达式，只支持常量（如：LongValue, StringValue）
              */
@@ -33,16 +39,15 @@ public class MybatisPlusConfig {
 
                 // 如果是匿名用户（正在登录），不强制加 tenant_id = 0
                 if (authentication != null && authentication.getPrincipal() instanceof LoginUser loginUser) {
-                    return new LongValue(loginUser.getUser().getTenantId());
+                    return new LongValue(loginUser.getUser().getTenantId()); // 返回当前租户id
                 }
 
-                // 关键点：如果无法获取当前租户，返回 null 或者一个特殊值
-                // 但更好的做法是在登录接口的 SQL 上忽略租户插件
-                return new LongValue(0L);
+                // 关键点: 在登录接口的 SQL 上忽略租户插件
+                return new LongValue(0L); // 返回公共用户
             }
 
             /**
-             * 获取租户字段名（数据库中的列名）
+             * 获取租户字段名（对应数据库中的列名）
              */
             @Override
             public String getTenantIdColumn() {
@@ -59,11 +64,15 @@ public class MybatisPlusConfig {
                         "sys_tenant",
                         "sys_menu",
                         "sys_user_role",
-                        "sys_role_menu"
+                        "sys_role_menu",
+                        "sys_notice",
+                        "sys_role"
                         );
                 return ignoreTables.contains(tableName);
             }
-        }));
+
+        })
+        );
 
         // 2. 添加分页插件 (多租户插件必须放在分页插件之前)
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor());

@@ -1,6 +1,7 @@
 package com.wchuan.system.controller;
 
-import com.wchuan.system.domain.vo.LoginUser;
+import
+        com.wchuan.system.domain.vo.LoginUser;
 import com.wchuan.system.domain.dto.ResponseResult;
 import com.wchuan.system.domain.entity.Tenant;
 import com.wchuan.system.mapper.TenantMapper;

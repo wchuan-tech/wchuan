@@ -19,10 +19,11 @@ public class AsyncConfig {
         executor.setQueueCapacity(100);
         executor.setThreadNamePrefix("wchuan-async-");
 
-        // 【关键代码】：挂载上面写的装饰器
-        executor.setTaskDecorator(new SecurityContextTaskDecorator());
+        // 挂载上面写的装饰器
+        executor.setTaskDecorator(new SecurityContextTaskDecoratorConfig());
 
         executor.initialize();
         return executor;
     }
+
 }

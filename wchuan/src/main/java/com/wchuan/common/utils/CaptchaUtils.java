@@ -10,7 +10,7 @@ public class CaptchaUtils {
 
     private final RedisCache redisCache;
     /**
-     * 验证码校验（封装成私有方法）
+     * 验证码校验
      */
     public void checkCaptcha(LoginRequest loginRequest) {
         String verifyKey = "captcha_codes:" + loginRequest.getUuid();

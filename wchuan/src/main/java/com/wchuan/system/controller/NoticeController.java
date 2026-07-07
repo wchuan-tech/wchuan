@@ -32,7 +32,7 @@ public class NoticeController {
      * 逻辑：租户管理员只能发“内部”公告，只有超级管理员(ID=1)能发“全平台”公告
      */
     @Log(title = "发布公告", businessType = 1)
-    @PreAuthorize("@ss.hasPerm('dev:notice:add')")
+    @PreAuthorize("@ss.hasPerm('system:notice:add')")
     @PostMapping("/add")
     public ResponseResult<?> add(@RequestBody SysNotice notice) {
         return noticeService.add(notice);
@@ -43,10 +43,10 @@ public class NoticeController {
      * 逻辑：多租户插件会自动生效，确保 A 租户删不掉 B 租户的公告
      */
     @Log(title = "删除公告", businessType = 3)
-    @PreAuthorize("@ss.hasPerm('dev:notice:remove')")
-    @DeleteMapping("/{id}")
-    public ResponseResult<?> remove(@PathVariable Long id) {
-        return noticeService.remove(id);
+    @PreAuthorize("@ss.hasPerm('system:notice:remove')")
+    @DeleteMapping("/batch") // 1. 明确路径为 /batch
+    public ResponseResult<?> remove(@RequestBody List<Long> ids) {
+        return noticeService.removeBatch(ids);
     }
 
 }

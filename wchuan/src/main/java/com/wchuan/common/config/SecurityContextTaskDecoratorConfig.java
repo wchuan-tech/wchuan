@@ -4,10 +4,10 @@ import org.springframework.core.task.TaskDecorator;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-public class SecurityContextTaskDecorator implements TaskDecorator {
+public class SecurityContextTaskDecoratorConfig implements TaskDecorator {
     @Override
     public Runnable decorate(Runnable runnable) {
-        // 1. 获取主线程的上下文
+        // 1. 获取主线程a的上下文
         SecurityContext context = SecurityContextHolder.getContext();
 
         return () -> {
@@ -22,4 +22,5 @@ public class SecurityContextTaskDecorator implements TaskDecorator {
             }
         };
     }
+
 }

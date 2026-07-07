@@ -22,8 +22,8 @@ public class MenuController {
     /**
      * 获取完整菜单树
      */
-    @GetMapping("/treeselect")
-    public ResponseResult<List<SysMenu>> treeselect() {
+    @GetMapping("/tree")
+    public ResponseResult<List<SysMenu>> tree() {
         return new ResponseResult<>(200, "查询成功", menuService.selectMenuTree());
     }
 
@@ -35,7 +35,7 @@ public class MenuController {
     @PostMapping
     public ResponseResult<?> add(@RequestBody SysMenu menu) {
         menuService.validateMenu(menu);
-        menuService.save(menu);
+        menuService.saveMenu(menu);
         return new ResponseResult<>(200, "新增成功");
     }
 
@@ -75,4 +75,5 @@ public class MenuController {
         menuService.selfHealing();
         return new ResponseResult<>(200, "系统权限拓扑自愈成功");
     }
+
 }

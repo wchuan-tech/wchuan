@@ -5,11 +5,12 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Data
 @TableName("sys_tenant")
-public class Tenant {
+public class Tenant implements Serializable {
 
     @TableId(type =  IdType.AUTO)
     private Long id;

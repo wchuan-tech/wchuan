@@ -87,10 +87,12 @@
             </el-form-item>
 
             <el-form-item label="公告类型">
+
               <el-radio-group v-model="noticeForm.type">
                 <el-radio label="0">租户内部</el-radio>
                 <el-radio label="1" v-if="isSuperAdmin">全平台</el-radio>
               </el-radio-group>
+
             </el-form-item>
 
             <el-form-item label="详细内容">
@@ -100,6 +102,7 @@
             <el-button type="primary" class="publish-btn" @click="handlePublish" :loading="publishLoading">
               立即发布
             </el-button>
+
           </el-form>
         </div>
       </div>
@@ -149,11 +152,14 @@ const cancelDeleteMode = () => {
 
 // 切换选择
 const toggleSelect = (id: number) => {
-  const idx = selectedIds.value.indexOf(id)
+  console.log('当前点击的ID:', id, '类型:', typeof id)
+
+  const targetId = Number(id); // 【关键】强制转为数字
+  const idx = selectedIds.value.indexOf(targetId);
   if (idx > -1) {
     selectedIds.value.splice(idx, 1)
   } else {
-    selectedIds.value.push(id)
+    selectedIds.value.push(targetId)
   }
 }
 
@@ -174,7 +180,7 @@ const fetchUserInfo = async () => {
   if (res.code === 200) userInfo.value = res.data
 }
 
-// 发布
+// 发布（添加公告）
 const handlePublish = async () => {
   if (!noticeForm.value.title || !noticeForm.value.content) {
     return ElMessage.warning('请填写完整信息')
@@ -202,7 +208,7 @@ const handleBatchDelete = async () => {
 
   try {
     const res = await request.delete<any, Result>('/dev/notice/batch', {
-      data: { ids: selectedIds.value }
+      data:  selectedIds.value
     })
     if (res.code === 200) {
       ElMessage.success('删除成功')
@@ -218,6 +224,7 @@ onMounted(() => {
   fetchUserInfo()
   fetchNotices()
 })
+
 </script>
 
 <style scoped>

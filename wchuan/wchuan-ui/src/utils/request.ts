@@ -4,7 +4,7 @@ import {ElMessage} from "element-plus";
 import router from "../router";
 
 const request = axios.create({
-    baseURL:'http://localhost:8080', // 指向后端地址
+    baseURL:'/api', // 指向后端地址
     timeout: 5000
 })
 

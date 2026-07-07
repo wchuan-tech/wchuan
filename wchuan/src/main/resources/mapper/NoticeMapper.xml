@@ -17,14 +17,9 @@
         SELECT n.*, t.tenant_name
         FROM sys_notice n
                  LEFT JOIN sys_tenant t ON n.tenant_id = t.id
-        WHERE (n.tenant_id = #{tenantId} OR n.type = '1')
+        WHERE (n.type = 1 OR n.tenant_id = #{tenantId})
         ORDER BY n.create_time DESC
     </select>
 
-    <select id="selectTenantNameById" parameterType="java.lang.Long" resultType="java.lang.String">
-        SELECT t.tenant_name
-        FROM sys_tenant t
-        WHERE t.id = #{tenantId}
-    </select>
 
 </mapper>

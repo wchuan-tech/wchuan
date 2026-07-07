@@ -23,6 +23,7 @@
             <transition name="fade-slide" mode="out-in">
               <div :key="quoteContent" class="quote-wrapper">
                 <div class="quote-main">{{ quoteContent }}</div>
+
                 <div v-if="quoteAuthor" class="quote-author">
                   <span class="dash">—</span> {{ quoteAuthor }}
                 </div>
@@ -33,13 +34,17 @@
 
         <!-- 操作按钮 -->
         <div class="action-group">
+
           <el-button type="primary" class="elegant-btn" @click="fetchHello">
             <el-icon><Refresh /></el-icon> 发起安全通信
           </el-button>
+
           <el-button link class="back-link" @click="router.push('/index')">
             返回系统控制台
           </el-button>
+
         </div>
+
       </div>
     </div>
   </div>
@@ -52,7 +57,7 @@ import request from '../utils/request'
 import { type Result } from '../api/types'
 import { Checked, Refresh } from '@element-plus/icons-vue'
 
-const router = useRouter()
+const router = useRouter() // 挂载路由实例
 const quoteContent = ref('') // 名言内容
 const quoteAuthor = ref('')  // 作者名
 const loading = ref(false)

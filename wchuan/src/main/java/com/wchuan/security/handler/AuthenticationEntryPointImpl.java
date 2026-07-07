@@ -19,10 +19,10 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         int status = HttpStatus.UNAUTHORIZED.value();
-        ResponseResult result = new ResponseResult(status,"认证失败");
+        ResponseResult<?> result = new ResponseResult<>(status,"认证失败");
         String json = JSON.toJSONString(result);
         // 处理异常
         WebUtils.renderString(response,status,json);
-
     }
+
 }

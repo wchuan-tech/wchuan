@@ -22,4 +22,5 @@ public class AsyncLogServiceImpl implements AsyncLogService {
     public void saveLog(SysOperLog operLog) {
         logMapper.insert(operLog);
     }
+
 }

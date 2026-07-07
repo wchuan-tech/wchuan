@@ -11,5 +11,5 @@ import java.util.List;
 public interface NoticeService {
     ResponseResult<List<SysNotice>> list();
     ResponseResult<?> add(SysNotice notice);
-    ResponseResult<?> remove(Long id);
+    ResponseResult<?> removeBatch(List<Long> ids);
 }

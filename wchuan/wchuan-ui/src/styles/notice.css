@@ -10,8 +10,8 @@
 }
 
 .notice-main-card {
-    width: 1000px;
-    height: 80vh;
+    width: 1100px; /* 【修改】稍微加宽一点，给两列更多空间 */
+    height: 85vh;   /* 【修改】稍微调高一点 */
     border-radius: 24px !important;
     background: rgba(255, 255, 255, 0.96) !important;
     display: flex;
@@ -22,143 +22,125 @@
 .notice-layout {
     display: flex;
     flex: 1;
-    overflow: hidden;
+    overflow: hidden; /* 必须，防止撑破大卡片 */
 }
 
-/* 左侧列表 */
+/* ================== 左侧列表区 ================== */
 .notice-list-side {
-    flex: 1.5;
-    padding: 30px;
+    flex: 1.6;
+    padding: 25px; /* 【修改】稍微缩小内边距 */
     border-right: 1px solid #f1f5f9;
+    /* 【核心新增】开启 Flex 垂直布局，确保底部工具栏可见 */
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .side-header {
+    flex-shrink: 0; /* 【新增】禁止头部被压缩 */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
+}
+
+/* 【新增】针对列表滚动区的控制 */
+.notice-list-side .el-scrollbar {
+    flex: 1; /* 【关键】让列表占据所有剩余空间，把工具栏挤到最下面 */
 }
 
 .notice-item-box {
+    position: relative;
+    padding: 18px; /* 【修改】增加内边距 */
     background: #f8fafc;
-    padding: 20px;
     border-radius: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
     border: 1px solid #e2e8f0;
+    transition: all 0.2s ease-in-out;
 }
 
-.notice-title {
-    font-size: 18px;
-    color: #1e293b;
-    margin: 10px 0;
+/* 【修改】选中时的样式，让对比度更高 */
+.notice-item-box.selected {
+    background: #eff6ff !important;
+    border: 1.5px solid #3b82f6 !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
 }
 
-.notice-content {
-    font-size: 14px;
-    color: #64748b;
-    line-height: 1.6;
+.notice-item-box.selectable {
+    cursor: pointer;
+    padding-left: 50px; /* 【修改】给左侧圆圈留出足够位置 */
 }
 
-.item-footer {
+.check-circle {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    border: 2px solid #cbd5e1; /* 【修改】加粗圆圈 */
+    border-radius: 50%;
+    background: #fff;
+}
+
+/* 【核心修改】删除工具栏样式 */
+.delete-bar {
+    flex-shrink: 0;    /* 【新增】防止工具栏被压缩 */
     margin-top: 15px;
-    font-size: 12px;
-    color: #94a3b8;
+    padding: 15px 20px;
+    background: #fff1f2; /* 【修改】换成淡红色背景，提醒正在删除模式 */
+    border: 1px solid #fecdd3;
+    border-radius: 12px;
     display: flex;
-    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.02); /* 【新增】微弱投影增加层级感 */
+    animation: slideUp 0.3s ease-out; /* 【新增】出现时的动画 */
 }
 
-/* 右侧管理 */
+/* 【新增】动画效果 */
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+/* ================== 右侧管理区 ================== */
 .notice-manage-side {
     flex: 1;
     padding: 30px;
     background: #ffffff;
+    display: flex;
+    flex-direction: column;
 }
 
 .manage-header h3 {
     margin-bottom: 20px;
     color: #4f46e5;
+    font-size: 18px;
+}
+
+.custom-form {
+    flex: 1;
 }
 
 .publish-btn {
     width: 100%;
-    height: 45px;
+    height: 48px;
     margin-top: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     font-weight: 600;
+    font-size: 15px;
 }
 
-/* Mac dots 保持一致 */
+/* Mac dots 修饰 */
 .header-decoration {
-    padding: 15px 20px;
+    padding: 12px 20px;
     display: flex;
     gap: 8px;
-    background: rgba(0, 0, 0, 0.03);
+    background: #f1f5f9;
+    flex-shrink: 0;
 }
-.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot { width: 12px; height: 12px; border-radius: 50%; }
 .red { background: #ff5f56; }
 .yellow { background: #ffbd2e; }
 .green { background: #27c93f; }
-
-
-.side-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.header-btns {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-}
-
-.notice-item-box {
-    position: relative;
-    padding: 14px;
-    background: #f9fafc;
-    border-radius: 8px;
-    margin-bottom: 10px;
-    transition: all 0.2s;
-}
-
-.notice-item-box.selectable {
-    cursor: pointer;
-    padding-left: 40px;
-}
-
-.notice-item-box.selected {
-    background: #e8f3ff !important;
-    border: 1px solid #409eff;
-}
-
-.check-circle {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 18px;
-    height: 18px;
-    border: 1px solid #ccc;
-    border-radius: 50%;
-}
-
-.check-circle .inner {
-    width: 10px;
-    height: 10px;
-    background: #409eff;
-    border-radius: 50%;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.delete-bar {
-    margin-top: 10px;
-    padding: 8px 12px;
-    background: #f7f8fa;
-    border-radius: 6px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}

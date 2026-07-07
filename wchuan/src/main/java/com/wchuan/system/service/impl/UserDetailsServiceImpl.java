@@ -29,6 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user;
         List<String> permissions;
 
+        // 首次登陆是不需要检验租户id
         InterceptorIgnoreHelper.handle(IgnoreStrategy.builder().tenantLine(true).build());
         try {
             LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
@@ -43,9 +44,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 // 给管理员加通配符 = 拥有所有权限
                 permissions.add("*");
             }
+            return new LoginUser(user, permissions);
         } finally {
             InterceptorIgnoreHelper.clearIgnoreStrategy();
         }
-        return new LoginUser(user, permissions);
     }
+
 }

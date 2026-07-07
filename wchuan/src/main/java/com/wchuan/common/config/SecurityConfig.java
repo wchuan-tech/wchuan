@@ -1,7 +1,7 @@
 package com.wchuan.common.config;
 
 import com.wchuan.security.filter.JwtAuthenticationTokenFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -27,10 +27,10 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private AuthenticationConfiguration authenticationConfiguration;
+    private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
     public AuthenticationManager authenticationManager() throws Exception {
@@ -42,20 +42,17 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
-    private JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
+    private final JwtAuthenticationTokenFilter jwtAuthenticationTokenFilter;
 
-    @Autowired
-    private AuthenticationEntryPoint authenticationEntryPoint;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
-    @Autowired
-    private AccessDeniedHandler accessDeniedHandler;
+    private final AccessDeniedHandler accessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .formLogin(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/user/login","/login.html","/static/**","/captchaImage").permitAll()
                         .requestMatchers("/logout").authenticated()
@@ -66,7 +63,7 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler))
-                //开启跨域访问
+                //开启跨域访问 解决前后端端口不一致问题
                 .cors(Customizer.withDefaults());
 
 
@@ -88,7 +85,7 @@ public class SecurityConfig {
         // 3. 允许的 Header。必须包含你前端传的 'token' 字段
         configuration.setAllowedHeaders(Arrays.asList("token", "Content-Type", "Authorization"));
 
-        // 4. 是否允许发送 Cookie
+        // 4. 是否允许携带认证信息（Cookie、Token、Authorization）
         configuration.setAllowCredentials(true);
 
         // 5. 预检请求的有效期（秒）

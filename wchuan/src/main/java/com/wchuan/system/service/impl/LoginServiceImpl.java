@@ -53,17 +53,17 @@ public class LoginServiceImpl implements LoginService {
         // 认证成功 将用户信息存入 LoginUser 中
         SecurityContextHolder.getContext().setAuthentication(authentication);
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
-
-        String userId = loginUser.getUser().getId().toString();
-
         System.out.println("loginUserAuthorities:" + loginUser.getAuthorities());
+        // 通过登陆用户创建token
+        String token = tokenService.createToken(loginUser);
+        // 获取用户id
+        String userId = loginUser.getUser().getId().toString();
         // 设置用户登陆信息时间
         redisCache.setCacheObject(LOGIN_TOKEN_KEY + userId, loginUser,SESSION_TTL, TimeUnit.MINUTES);
 
         // 创建用户在线时间日志
         onlineLogService.createOnlineLog(loginUser);
 
-        String token = tokenService.createToken(loginUser);
         Map<String,String> map = new HashMap<>();
         map.put("token",token);
 

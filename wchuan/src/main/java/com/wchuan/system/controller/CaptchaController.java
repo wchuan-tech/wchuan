@@ -42,4 +42,5 @@ public class CaptchaController {
 
         return new ResponseResult<>(200, "操作成功", map);
     }
+
 }

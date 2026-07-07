@@ -6,33 +6,19 @@
         <el-icon color="#4f46e5" :size="24"><Platform /></el-icon>
         <span>WCHUAN</span>
       </div>
-      <el-menu default-active="/index" background-color="#0f172a" text-color="#94a3b8" active-text-color="#ffffff" router>
-        <!-- 【新增】左侧菜单栏：公告中心 -->
-        <el-menu-item index="/notice">
-          <el-icon><Notification /></el-icon>
-          <span>公告</span>
-        </el-menu-item>
-
-        <el-menu-item index="/index">
-          <el-icon><Grid /></el-icon>
-          <span>控制台概览</span>
-        </el-menu-item>
-
-        <!-- 【新增】菜单管理 -->
-        <el-menu-item index="/menu">
-          <el-icon><Setting /></el-icon>
-          <span>菜单权限管理</span>
-        </el-menu-item>
-
-        <el-menu-item index="/profile">
-          <el-icon><User /></el-icon>
-          <span>个人中心</span></el-menu-item>
-
-        <el-menu-item index="/hello">
-          <el-icon><Compass /></el-icon>
-          <span>权限测试中心</span>
-        </el-menu-item>
-
+      <el-menu
+          :default-active="route.path"
+          background-color="#0f172a"
+          text-color="#94a3b8"
+          active-text-color="#ffffff"
+          router
+      >
+        <!-- 使用递归组件渲染后端传来的树 -->
+        <SidebarItem
+            v-for="menu in sideMenuList"
+            :key="menu.id"
+            :item="menu"
+        />
       </el-menu>
     </el-aside>
 
@@ -147,14 +133,16 @@
 </template>
 
 <script setup lang="ts">
+import SidebarItem from '../components/SidebarItem.vue' // 引入递归组件
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import {Platform, Grid, User, Compass,
-  ArrowDown, Operation, Notification, Setting} from '@element-plus/icons-vue'
+import { useRouter, useRoute } from 'vue-router' // 1. 确保引入了两个不同的函数
+import {Platform,
+  ArrowDown, Operation, Notification} from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import request from '../utils/request'
-import { type Result, type UserInfo } from '../api/types'
+import {type Result, type SysMenu, type UserInfo} from '../api/types'
 
+const route = useRoute()
 const router = useRouter()
 const nickname = ref('')
 const loading = ref(false)
@@ -174,8 +162,19 @@ const fetchUserInfo = async () => {
   }
 }
 
+const sideMenuList = ref<SysMenu[]>([])
+const getSideMenus = async () => {
+  // 调用你之前写好的后端获取树的接口
+  const res = await request.get<any, Result<SysMenu[]>>('/system/menu/tree')
+  if (res.code === 200) {
+    // 侧边栏只需要展示 M 和 C，后端接口通常已经处理好，或者在此处简单过滤
+    sideMenuList.value = res.data
+  }
+}
+
 onMounted(() => {
   fetchUserInfo()
+  getSideMenus() // 页面加载时抓取侧边栏结构
 })
 
 // 时钟与欢迎语逻辑
@@ -237,14 +236,15 @@ const handleLogout = async () => {
     if (res.code === 200) {
       localStorage.removeItem('token')
       ElMessage.success('已安全退出')
-      router.replace('/login')
+      await router.replace('/login')
     }
   } catch (err) {
     // 如果请求失败（比如Token已失效），为了用户体验，也执行前端退出
     localStorage.removeItem('token')
-    router.replace('/login')
+    await router.replace('/login')
   }
 }
+
 </script>
 
 <style scoped>

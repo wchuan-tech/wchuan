@@ -17,7 +17,7 @@
         <java.version>17</java.version>
     </properties>
     <dependencies>
-        <!-- Spring Boot 安全功能的starter包，用于web应用的安全控制 -->
+        <!-- 1.Spring Boot 安全功能的starter包，用于web应用的安全控制 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
@@ -44,7 +44,7 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
-        <!-- FastJSON，一个Java语言编写的高性能功能完备的JSON库 -->
+        <!-- FastJSON，一个 Java 语言编写的高性能功能完备的JSON库 -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
@@ -56,7 +56,7 @@
             <artifactId>jjwt</artifactId>
             <version>0.9.0</version>
         </dependency>
-        <!-- JAXB API，用于XML和Java对象之间的绑定 -->
+        <!-- JAXB API，用于 XML 和 Java对象 之间的绑定 -->
         <dependency>
             <groupId>javax.xml.bind</groupId>
             <artifactId>jaxb-api</artifactId>
@@ -79,11 +79,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
+        <!-- JSpecify 规范注解：提供统一的空值安全、类型注解标准，用于代码静态检查和规范 -->
         <dependency>
             <groupId>org.jspecify</groupId>
             <artifactId>jspecify</artifactId>
-            <version>0.3.0</version> <!-- 建议版本 -->
+            <version>0.3.0</version>
         </dependency>
+        <!-- Hutool 工具包：Java 工具类合集，简化字符串、日期、加密、IO、集合、图形验证码等常用操作 -->
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>

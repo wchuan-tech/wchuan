@@ -38,7 +38,10 @@ public class OnlineLogServiceImpl implements OnlineLogService {
         onlineLog.setLoginTime(new Date());
         onlineLog.setLastActivityTime(new Date());
 
-        // 存入 Redis 在线寿命初始化为 60 分钟
+        // 在 Web 线程（有上下文）时，抓取租户 ID 存入 Redis 对象
+        onlineLogMapper.insert(onlineLog);
+
+        // 存入 Redis 在线有效期初始化为 41 分钟
         redisCache.setCacheObject(ONLINE_USER_LOG_KEY + userId, onlineLog, ONLINE_LOG_REDIS_TTL, TimeUnit.MINUTES);
     }
 
@@ -56,6 +59,7 @@ public class OnlineLogServiceImpl implements OnlineLogService {
             settleOnlineLog(onlineLog, 0); // 0-正常退出
             redisCache.deleteObject(onlineKey);
         }
+
     }
 
     @Override
@@ -66,9 +70,10 @@ public class OnlineLogServiceImpl implements OnlineLogService {
         SysUserOnlineLog onlineLog = redisCache.getCacheObject(onlineKey);
         if (onlineLog != null) {
             onlineLog.setLastActivityTime(new Date());
-            // 每次刷新为 60 分钟
+            // 每次刷新为 41 分钟
             redisCache.setCacheObject(onlineKey, onlineLog, ONLINE_LOG_REDIS_TTL, TimeUnit.MINUTES);
         }
+
     }
 
     /**
@@ -80,22 +85,14 @@ public class OnlineLogServiceImpl implements OnlineLogService {
 
         if (onlineLog == null) return;
 
-        SysUserOnlineLog log = new SysUserOnlineLog();
-        log.setUserId(onlineLog.getUserId());
-        log.setUserName(onlineLog.getUserName());
-        log.setIpAddr(onlineLog.getIpAddr());
-        log.setLoginTime(onlineLog.getLoginTime());
+        // 计算时长
+        long duration = (onlineLog.getLastActivityTime().getTime() - onlineLog.getLoginTime().getTime()) / 1000;
+        onlineLog.setDuration(Math.max(0, duration));
+        onlineLog.setExitType(exitType);
 
-        // 最后活跃时间
-        Date lastActive = onlineLog.getLastActivityTime();
-        log.setLastActivityTime(lastActive);
-
-        // 计算时长（秒）：最后活跃时间 - 登录时间
-        long duration = (lastActive.getTime() - onlineLog.getLoginTime().getTime()) / 1000;
-        log.setDuration(Math.max(0, duration));
-        log.setExitType(exitType);
-
-        log.setTenantId(onlineLog.getTenantId());
-        onlineLogMapper.insert(log);
+        // 此时 onlineLog 里的 id 是 null（因为它是从 Redis 来的，还没进过库）
+        // 而数据库 sys_user_online_log 的 id 是自增的。
+        // 直接 insert 这个对象即可，不需要重新 new 之后一个一个 set
+        onlineLogMapper.updateById(onlineLog);
     }
 }

@@ -12,7 +12,7 @@ import java.util.Date;
 import java.util.UUID;
 
 public class JwtUtil {
-    public static final Long JWT_TTL = 60 * 60 * 1000L;// 60 * 60 * 1000 有效期为 1h
+    public static final Long JWT_TTL = 24 * 60 * 60 * 1000L;// 60 * 60 * 1000 有效期为 1h
 
     public static final String JWT_KEY = "wchuan1234567890wchuan1234567890";
 
@@ -57,8 +57,6 @@ public class JwtUtil {
                 .setIssuedAt(now)
                 .signWith(signatureAlgorithm, secretKey)
                 .setExpiration(expDate);
-
-
     }
 
     private static SecretKey generalKey() {
@@ -73,4 +71,5 @@ public class JwtUtil {
                 .parseClaimsJws(jwt)
                 .getBody();
     }
+
 }

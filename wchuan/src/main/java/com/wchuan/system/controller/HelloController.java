@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class HelloController {
 
-    // 建议在配置类中统一注册Bean，这里直接new也可
+    // 建议在配置类中统一注册Bean
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Log(title = "测试接口") // 只需要加这一行！

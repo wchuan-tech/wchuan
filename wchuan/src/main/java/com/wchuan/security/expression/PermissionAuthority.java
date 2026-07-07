@@ -18,6 +18,7 @@ public class PermissionAuthority {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals(permission));
+                .anyMatch(authority ->
+                        authority.getAuthority().equals(permission));
     }
 }

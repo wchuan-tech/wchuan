@@ -99,9 +99,6 @@ const loginForm = reactive({
   code: ''
 })
 
-// 记住账号
-const rememberMe = ref(false)
-
 // 表单校验规则
 const formRules = {
   userName: [{ required: true, message: '请输入用户名', trigger: ['change'] }],
@@ -112,14 +109,11 @@ const formRules = {
 // 验证码
 const captchaImg = ref('')
 
-// 读取缓存
+// 读取缓存   onMounted 生命周期钩子 中显式调用了 getCaptcha() 函数
 onMounted(() => {
-  const remember = localStorage.getItem('rememberMe')
   const account = localStorage.getItem('userAccount')
-  if (remember === 'true' && account) {
-    loginForm.userName = account
-    rememberMe.value = true
-  }
+  if (account) loginForm.userName = account
+
   getCaptcha()
 
   nextTick(() => {
@@ -167,10 +161,8 @@ const handleLogin = async () => {
         localStorage.setItem('userId', infoRes.data.id.toString())
         localStorage.setItem('permissions', JSON.stringify(infoRes.data.permissions || []))
 
-        localStorage.setItem('rememberMe', 'true')
         localStorage.setItem('userAccount', loginForm.userName)
       } else {
-        localStorage.removeItem('rememberMe')
         localStorage.removeItem('userAccount')
       }
       await router.push('/index')
@@ -184,6 +176,7 @@ const handleLogin = async () => {
     }
   } catch (err) {
     ElMessage.error('用户名或密码错误,请重试')
+    loginForm.password = ''
     await getCaptcha()
     await nextTick(() => {
       formRef.value?.clearValidate()

@@ -10,11 +10,8 @@ import java.util.List;
 
 public interface NoticeMapper extends BaseMapper<SysNotice> {
     /**
-     * @InterceptorIgnore(tenantLine = "true") 表示此方法不被多租户插件自动修改 SQL
+     * 自定义方法不被多租户插件自动修改 SQL
      */
-    @InterceptorIgnore(tenantLine = "true")
     List<SysNotice> selectNoticeMixed(@Param("tenantId") Long tenantId);
 
-    @InterceptorIgnore(tenantLine = "true")
-    String selectTenantNameById(@Param("tenantId") Long tenantId);
 }

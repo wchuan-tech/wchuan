@@ -27,17 +27,23 @@ public class LogAspect {
 
     private final AsyncLogService asyncLogService; // 1. 注入异步服务类
 
+    /**
+     * joinPoint AOP 执行上下文 包含方法名、类名、参数、执行权限
+     * controller 注解 (@Log) 的实例 在注解里写的 title、businessType 等
+     */
     @Around("@annotation(controllerLog)")
     public Object doAround(ProceedingJoinPoint joinPoint, Log controllerLog) throws Throwable {
         long startTime = System.currentTimeMillis();
 
-        // 执行原始方法
         Object result;
         Exception exception = null;
 
         System.out.println("StartTime:" + startTime);
         try {
-            result = joinPoint.proceed(); // joinPoint 表示有 @Log 标识的方法 result 表示上述方法的返回值
+            // 执行目标方法（即被 @Log 标识的方法）
+            // joinPoint.proceed() 触发业务逻辑执行
+            // result 接收该业务方法执行后的返回值（如 ResponseResult 对象）
+            result = joinPoint.proceed();
             return result;
         } catch (Exception e) {
             exception = e;
@@ -47,7 +53,6 @@ public class LogAspect {
             // 记录日志入库
             handleLog(joinPoint, controllerLog, exception, costTime);
         }
-
     }
 
     private void handleLog(JoinPoint joinPoint, Log controllerLog, Exception e, long costTime) {
@@ -62,8 +67,8 @@ public class LogAspect {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
             if (attributes != null) {
                 HttpServletRequest request = attributes.getRequest();
-                sysOperLog.setOperUrl(request.getRequestURI()); // 获取请求路径
                 sysOperLog.setOperIp(request.getRemoteAddr()); // 获取请求地址
+                sysOperLog.setOperUrl(request.getRequestURI()); // 获取请求路径
                 sysOperLog.setRequestMethod(request.getMethod()); // 获取请求方法
             }
 
@@ -81,7 +86,7 @@ public class LogAspect {
             sysOperLog.setTitle(controllerLog.title());
             sysOperLog.setBusinessType(controllerLog.businessType());
 
-            // 5. 设置执行的方法名  joinPoint.getTarget() 获取被拦截的类对象
+            // 5. joinPoint.getTarget() 获取被拦截的类对象信息 方法名、参数等
             String methodName = joinPoint.getSignature().getName();
             sysOperLog.setMethod(methodName);
 

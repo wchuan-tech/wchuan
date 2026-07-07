@@ -16,4 +16,5 @@ public class BaseEntity implements Serializable {
      */
     @TableField(fill = FieldFill.INSERT) // 插入时自动填充
     private Long tenantId;
+
 }
