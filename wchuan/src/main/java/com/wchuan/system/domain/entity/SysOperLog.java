@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -24,6 +24,6 @@ public class SysOperLog extends BaseEntity {
     private String operIp;         // 主机地址
     private Integer status;        // 操作状态 (0正常 1异常)
     private String errorMsg;       // 错误消息
-    private Date operTime;         // 操作时间
+    private LocalDateTime operTime;         // 操作时间
     private Long costTime;         // 消耗时间
 }

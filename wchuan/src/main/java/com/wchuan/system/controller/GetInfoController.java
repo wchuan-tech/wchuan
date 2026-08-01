@@ -3,8 +3,6 @@ package com.wchuan.system.controller;
 import
         com.wchuan.system.domain.vo.LoginUser;
 import com.wchuan.system.domain.dto.ResponseResult;
-import com.wchuan.system.domain.entity.Tenant;
-import com.wchuan.system.mapper.TenantMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,7 +22,6 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class GetInfoController {
 
-    private final TenantMapper tenantMapper;
 
     @GetMapping("/user/getInfo")
     public ResponseResult<?> getInfo() {
@@ -38,11 +35,6 @@ public class GetInfoController {
         // 如果 permissions 为空，给一个空集合而不是 null
         map.put("permissions", perms != null ? perms : new ArrayList<>());
 
-        Long tenantId = loginUser.getUser().getTenantId();
-        map.put("tenantId", loginUser.getUser().getTenantId());
-
-        Tenant tenant = tenantMapper.selectById(tenantId);
-        map.put("tenantName", tenant.getTenantName());
 
         return new ResponseResult<>(200, "操作成功", map);
     }

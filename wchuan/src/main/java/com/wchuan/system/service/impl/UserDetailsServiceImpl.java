@@ -29,25 +29,22 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user;
         List<String> permissions;
 
-        // 首次登陆是不需要检验租户id
-        InterceptorIgnoreHelper.handle(IgnoreStrategy.builder().tenantLine(true).build());
-        try {
-            LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(User::getUserName, username);
-            user = userMapper.selectOne(queryWrapper);
+        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
 
-            if (Objects.isNull(user)) {
-                throw new UsernameNotFoundException("UserDetails:用户名或密码错误");
-            }
-            permissions = menuMapper.selectMenuNameByUserId(user.getId());
-            if (user.getId() == 1) {
-                // 给管理员加通配符 = 拥有所有权限
-                permissions.add("*");
-            }
-            return new LoginUser(user, permissions);
-        } finally {
-            InterceptorIgnoreHelper.clearIgnoreStrategy();
+        queryWrapper.eq(User::getUserName, username);
+
+        user = userMapper.selectOne(queryWrapper);
+
+        if (Objects.isNull(user)) {
+            throw new UsernameNotFoundException("UserDetails:用户名或密码错误");
         }
+
+        permissions = menuMapper.selectMenuNameByUserId(user.getId());
+        if (user.getId() == 1) {
+            // 给管理员加通配符 = 拥有所有权限
+            permissions.add("*");
+        }
+        return new LoginUser(user, permissions);
     }
 
 }

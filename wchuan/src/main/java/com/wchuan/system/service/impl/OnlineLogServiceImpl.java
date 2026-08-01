@@ -8,7 +8,9 @@ import com.wchuan.system.mapper.OnlineLogMapper;
 import com.wchuan.system.service.OnlineLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import java.util.Date;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
 
 import static com.wchuan.common.constants.Constants.ONLINE_LOG_REDIS_TTL;
@@ -35,8 +37,8 @@ public class OnlineLogServiceImpl implements OnlineLogService {
         onlineLog.setUserId(loginUser.getUser().getId());
         onlineLog.setUserName(loginUser.getUsername());
         onlineLog.setIpAddr(ip);
-        onlineLog.setLoginTime(new Date());
-        onlineLog.setLastActivityTime(new Date());
+        onlineLog.setLoginTime(LocalDateTime.now());
+        onlineLog.setLastActivityTime(LocalDateTime.now());
 
         // 在 Web 线程（有上下文）时，抓取租户 ID 存入 Redis 对象
         onlineLogMapper.insert(onlineLog);
@@ -55,7 +57,7 @@ public class OnlineLogServiceImpl implements OnlineLogService {
 
         SysUserOnlineLog onlineLog = redisCache.getCacheObject(onlineKey);
         if (onlineLog != null) {
-            onlineLog.setLastActivityTime(new Date());
+            onlineLog.setLastActivityTime(LocalDateTime.now());
             settleOnlineLog(onlineLog, 0); // 0-正常退出
             redisCache.deleteObject(onlineKey);
         }
@@ -69,7 +71,7 @@ public class OnlineLogServiceImpl implements OnlineLogService {
 
         SysUserOnlineLog onlineLog = redisCache.getCacheObject(onlineKey);
         if (onlineLog != null) {
-            onlineLog.setLastActivityTime(new Date());
+            onlineLog.setLastActivityTime(LocalDateTime.now());
             // 每次刷新为 41 分钟
             redisCache.setCacheObject(onlineKey, onlineLog, ONLINE_LOG_REDIS_TTL, TimeUnit.MINUTES);
         }
@@ -81,12 +83,17 @@ public class OnlineLogServiceImpl implements OnlineLogService {
      * @param onlineLog Redis中的在线信息
      * @param exitType 退出类型
      */
+    @Override
     public void settleOnlineLog(SysUserOnlineLog onlineLog, int exitType) {
 
-        if (onlineLog == null) return;
+        if (onlineLog == null) {
+            return;
+        }
 
         // 计算时长
-        long duration = (onlineLog.getLastActivityTime().getTime() - onlineLog.getLoginTime().getTime()) / 1000;
+        // ✅ 正确写法（直接获取相差的秒数）：
+        long duration = Duration.between(onlineLog.getLoginTime(), onlineLog.getLastActivityTime()).toSeconds();
+
         onlineLog.setDuration(Math.max(0, duration));
         onlineLog.setExitType(exitType);
 

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Aspect
 @Component
@@ -60,7 +60,7 @@ public class LogAspect {
             SysOperLog sysOperLog = new SysOperLog();
 
             // 1. 设置时间与耗时
-            sysOperLog.setOperTime(new Date());
+            sysOperLog.setOperTime(LocalDateTime.now());
             sysOperLog.setCostTime(costTime);
 
             // 2. 获取请求信息 (URL, IP)

@@ -39,7 +39,7 @@ public class CaptchaController {
         Map<String, Object> map = new HashMap<>();
         map.put("uuid", uuid);
         map.put("img", lineCaptcha.getImageBase64Data()); // 会带有 data:image/png;base64, 前缀
-
+        System.out.println(">>>> 当前生成的验证码 UUID 为:" + uuid + "验证码答案为: " + code);
         return new ResponseResult<>(200, "操作成功", map);
     }
 

@@ -10,6 +10,5 @@ public interface MenuMapper extends BaseMapper<SysMenu> {
 
     List<String> selectMenuNameByUserId(Long userId);
 
-    @InterceptorIgnore(tenantLine = "true") // 菜单通常是全局的，忽略租户隔离
     List<SysMenu> selectMenuTreeByUserId(Long userId);
 }

@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.io.Serial;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -22,6 +22,9 @@ public class User extends BaseEntity {
 
     @TableId(type = IdType.AUTO) // 明确指定主键策略与数据库一致
     private Long id;
+
+    /** 部门ID（🔑 关联 sys_dept 的关键字段） */
+    private Long deptId;
 
     private String userName;
 
@@ -40,14 +43,6 @@ public class User extends BaseEntity {
     private String avatar;
 
     private String userType;
-
-    private Long createBy;
-
-    private Date createTime;
-
-    private String updateBy;
-
-    private Date updateTime;
 
     private Integer delFlag;
 }

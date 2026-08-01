@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -20,6 +20,4 @@ public class SysNotice extends BaseEntity{
     private String type;
     private Long tenantId;
     private String tenantName;
-    private Date createTime;
-    private String createBy;
 }

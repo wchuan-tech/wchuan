@@ -53,10 +53,6 @@
 
               <div class="item-footer">
                 <span>发布人: {{ item.createBy }}</span>
-                <span class="tenant-tag" v-if="item.type === '0'">
-                  <el-icon><OfficeBuilding /></el-icon>
-                  所属租户：{{ item.tenantName }}
-                </span>
               </div>
             </div>
 
@@ -112,7 +108,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { Notification, Refresh, OfficeBuilding, EditPen, Delete } from '@element-plus/icons-vue'
+import { Notification, Refresh, EditPen, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import request from '../utils/request'
 import { type Result, type SysNotice, type UserInfo } from '../api/types'

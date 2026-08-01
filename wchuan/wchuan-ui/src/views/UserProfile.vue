@@ -72,7 +72,6 @@
                 <template #label>
                   <div class="cell-item"><el-icon><OfficeBuilding /></el-icon> 所属租户</div>
                 </template>
-                <el-tag type="info" effect="plain">{{ userInfo.tenantName || '默认租户' }}</el-tag>
               </el-descriptions-item>
 
             </el-descriptions>

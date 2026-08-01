@@ -24,8 +24,6 @@ export interface UserInfo {
     nickName: string;
     roles: string[];      // 角色列表
     permissions: string[]; // 权限标识列表
-    tenantId: number;     // 新增
-    tenantName?: string;  // 新增（可选）
 }
 
 // src/api/types.ts
@@ -35,8 +33,6 @@ export interface SysNotice {
     title: string;
     content: string;
     type: string;        // '0' 为租户公告，'1' 为系统公告
-    tenantId: number,
-    tenantName: string,
     createTime: string;
     createBy?: string;
 }

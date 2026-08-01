@@ -6,7 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 @Data
 @TableName("sys_tenant")
@@ -23,10 +24,10 @@ public class Tenant implements Serializable {
 
     private String status;       // 状态 (0正常 1停用)
 
-    private Date expireTime;
+    private LocalDateTime expireTime;
 
-    private Date createTime;
+    private LocalDateTime createTime;
 
-    private Date updateTime;
+    private LocalDateTime updateTime;
 
 }

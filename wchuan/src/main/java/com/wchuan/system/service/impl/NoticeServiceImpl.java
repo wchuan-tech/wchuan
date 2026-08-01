@@ -1,11 +1,9 @@
 package com.wchuan.system.service.impl;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.wchuan.common.utils.SecurityUtils;
 import com.wchuan.system.domain.dto.ResponseResult;
 import com.wchuan.system.domain.entity.SysNotice;
-import com.wchuan.system.domain.entity.Tenant;
 import com.wchuan.system.domain.entity.User;
 import com.wchuan.system.domain.vo.LoginUser;
 import com.wchuan.system.mapper.NoticeMapper;
@@ -15,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -23,8 +22,6 @@ import java.util.List;
 public class NoticeServiceImpl implements NoticeService {
 
     private final NoticeMapper noticeMapper;
-
-    private final TenantMapper tenantMapper;
 
     @Override
     public ResponseResult<List<SysNotice>> list() {
@@ -38,7 +35,6 @@ public class NoticeServiceImpl implements NoticeService {
             System.out.println("timeNow" + new Date());
             System.out.println("loginUserName: "+ loginUser.getUser().getUserName());
             System.out.println("Authorities: " + loginUser.getAuthorities());
-            System.out.println("sysNotice.name: " + sysNotice.getTenantName());
         }
         return new ResponseResult<>(200, "查询成功", list);
     }
@@ -56,23 +52,9 @@ public class NoticeServiceImpl implements NoticeService {
         // 获取当前在线用户信息
         User user = loginUser.getUser();
 
-        // 发布人（昵称）
-        notice.setCreateBy(user.getNickName());
-
-        // 获取租户名称
-        Tenant tenant = tenantMapper.selectById(user.getTenantId());
-
-        // 获取当前用户
-        String tenantName = tenant.getTenantName();
-
-        // 设置当前用户为公告发布者
-        notice.setTenantName(tenantName);
-
-        // 设置创建者姓名（方便展示）
-        notice.setCreateBy(loginUser.getUsername());
 
         // 设置公告创建时间
-        notice.setCreateTime(new Date());
+        notice.setCreateTime(LocalDateTime.now());
         // 插入数据库
         // 注意：tenant_id 会由我们之前写的 MyMetaObjectHandler 自动填充
         noticeMapper.insert(notice);
@@ -80,6 +62,7 @@ public class NoticeServiceImpl implements NoticeService {
         return new ResponseResult<>(200, "公告发布成功");
     }
 
+    @Override
     public ResponseResult<?> removeBatch(List<Long> ids) {
         // 1. 先查出这些公告
         List<SysNotice> list = noticeMapper.selectBatchIds(ids);

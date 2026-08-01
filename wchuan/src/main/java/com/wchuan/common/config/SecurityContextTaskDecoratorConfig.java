@@ -4,6 +4,7 @@ import org.springframework.core.task.TaskDecorator;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+// 单租户实现
 public class SecurityContextTaskDecoratorConfig implements TaskDecorator {
     @Override
     public Runnable decorate(Runnable runnable) {

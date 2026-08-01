@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -17,8 +17,8 @@ public class SysUserOnlineLog extends BaseEntity {
     private Long userId; // 用户 id
     private String userName; // 用户名
     private String ipAddr; // ip地址
-    private Date loginTime; // 登录时间
-    private Date lastActivityTime; // 上次活跃时间
+    private LocalDateTime loginTime; // 登录时间
+    private LocalDateTime lastActivityTime; // 上次活跃时间
     private Long duration;   // 时长（秒）
     private Integer exitType; // 0-正常注销, 1-超时结算
 }

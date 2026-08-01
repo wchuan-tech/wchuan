@@ -11,9 +11,11 @@
                 LEFT JOIN sys_role_menu rm ON ur.`role_id` = rm.`role_id`
                 LEFT JOIN sys_menu m ON m.`id` = rm.`menu_id`
         WHERE
-            user_id = #{userId}
+            ur.`user_id` = #{userId}
           AND r.`status` = 0
-          AND m.`status` = 0;
+          AND m.`status` = 0
+          AND m.`perms` IS NOT NULL
+          AND m.`perms` != ''
     </select>
 
     <resultMap id="SysMenuResult" type="com.wchuan.system.domain.entity.SysMenu">
