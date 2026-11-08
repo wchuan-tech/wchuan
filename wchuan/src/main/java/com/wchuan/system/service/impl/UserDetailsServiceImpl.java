@@ -1,12 +1,12 @@
 package com.wchuan.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.plugins.IgnoreStrategy;
-import com.baomidou.mybatisplus.core.plugins.InterceptorIgnoreHelper;
+import com.wchuan.system.domain.entity.SysRole;
 import com.wchuan.system.domain.vo.LoginUser;
-import com.wchuan.system.domain.entity.User;
-import com.wchuan.system.mapper.MenuMapper;
-import com.wchuan.system.mapper.UserMapper;
+import com.wchuan.system.domain.entity.SysUser;
+import com.wchuan.system.mapper.SysMenuMapper;
+import com.wchuan.system.mapper.SysRoleMapper;
+import com.wchuan.system.mapper.SysUserMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -20,24 +20,29 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserMapper userMapper;
+    private final SysUserMapper userMapper;
 
-    private final MenuMapper menuMapper;
+    private final SysMenuMapper menuMapper;
+
+    private final SysRoleMapper roleMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user;
+        SysUser user;
         List<String> permissions;
 
-        LambdaQueryWrapper<User> queryWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<SysUser> queryWrapper = new LambdaQueryWrapper<>();
 
-        queryWrapper.eq(User::getUserName, username);
+        queryWrapper.eq(SysUser::getUserName, username);
 
         user = userMapper.selectOne(queryWrapper);
 
         if (Objects.isNull(user)) {
             throw new UsernameNotFoundException("UserDetails:用户名或密码错误");
         }
+
+        List<SysRole> roles = roleMapper.selectRolesByUserId(user.getId());
+        user.setRoles(roles);
 
         permissions = menuMapper.selectMenuNameByUserId(user.getId());
         if (user.getId() == 1) {

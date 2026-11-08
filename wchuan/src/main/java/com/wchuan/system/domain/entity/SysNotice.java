@@ -18,6 +18,5 @@ public class SysNotice extends BaseEntity{
     private String title;
     private String content;
     private String type;
-    private Long tenantId;
     private String tenantName;
 }

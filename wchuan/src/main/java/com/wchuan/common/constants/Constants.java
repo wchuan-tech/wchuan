@@ -6,7 +6,7 @@ public class Constants {
     public static final int JWT_TTL = 120; // 2小时
 
     /** Redis 会话有效期（分钟） */
-    public static final int SESSION_TTL = 30; // 30分钟
+    public static final int TOKEN_TTL = 30; // 30分钟
 
     /** 过期时间：30 分钟  */
     public static final int EXPIRE_TIME = 30; // 30分钟

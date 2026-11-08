@@ -1,6 +1,7 @@
 package com.wchuan.common.config;
 
 import com.wchuan.security.filter.JwtAuthenticationTokenFilter;
+import jakarta.servlet.DispatcherType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +19,7 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.savedrequest.NullRequestCache;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -51,20 +53,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        http
+                // 关闭 CSRF
+                .csrf(AbstractHttpConfigurer::disable)
+                // 开启跨域
+                .cors(Customizer.withDefaults())
+
+                // 声明无状态
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 针对 REST API，显式关闭登录前请求缓存
+                .requestCache(cache -> cache
+                        .requestCache(new NullRequestCache())
+                )
+
+                // URL 权限规则
                 .authorizeHttpRequests(auth -> auth
+                        .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
                         .requestMatchers("/user/login","/login.html","/static/**","/captchaImage").permitAll()
                         .requestMatchers("/logout").authenticated()
                         // .requestMatchers("/hello").hasAuthority("system:dev:list")
                         .anyRequest().authenticated())
+
+                // 挂载自定义 JWT Filter
                 .addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class)
+
                 // 配置异常处理器
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                 .authenticationEntryPoint(authenticationEntryPoint)
-                .accessDeniedHandler(accessDeniedHandler))
-                //开启跨域访问 解决前后端端口不一致问题
-                .cors(Customizer.withDefaults());
+                .accessDeniedHandler(accessDeniedHandler)
+                );
 
 
         return http.build();

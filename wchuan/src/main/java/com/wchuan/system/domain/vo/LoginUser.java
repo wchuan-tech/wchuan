@@ -1,7 +1,7 @@
 package com.wchuan.system.domain.vo;
 
 import com.alibaba.fastjson.annotation.JSONField;
-import com.wchuan.system.domain.entity.User;
+import com.wchuan.system.domain.entity.SysUser;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
@@ -18,10 +18,10 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class LoginUser implements UserDetails, Serializable {
 
-    private User user;
+    private SysUser user;
     private List<String> permissions;
 
-    public LoginUser(User user, List<String> permissions) {
+    public LoginUser(SysUser user, List<String> permissions) {
         this.user = user;
         this.permissions = permissions;
     }

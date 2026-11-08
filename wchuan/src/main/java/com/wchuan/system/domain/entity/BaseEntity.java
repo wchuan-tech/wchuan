@@ -16,17 +16,13 @@ public class BaseEntity implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    /** 租户ID */
-    @TableField(fill = FieldFill.INSERT)
-    private Long tenantId;
-
     /** 创建者 */
     @TableField(fill = FieldFill.INSERT)
-    private Long createBy;
+    private String createBy; // 👈 改为 String
 
     /** 更新者 */
     @TableField(fill = FieldFill.INSERT_UPDATE)
-    private Long updateBy;
+    private String updateBy; // 👈 改为 String
 
     /** 创建时间 */
     @TableField(fill = FieldFill.INSERT)

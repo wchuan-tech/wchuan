@@ -4,10 +4,9 @@ package com.wchuan.system.service.impl;
 import com.wchuan.common.utils.SecurityUtils;
 import com.wchuan.system.domain.dto.ResponseResult;
 import com.wchuan.system.domain.entity.SysNotice;
-import com.wchuan.system.domain.entity.User;
+import com.wchuan.system.domain.entity.SysUser;
 import com.wchuan.system.domain.vo.LoginUser;
-import com.wchuan.system.mapper.NoticeMapper;
-import com.wchuan.system.mapper.TenantMapper;
+import com.wchuan.system.mapper.SysNoticeMapper;
 import com.wchuan.system.service.NoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -21,14 +20,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class NoticeServiceImpl implements NoticeService {
 
-    private final NoticeMapper noticeMapper;
+    private final SysNoticeMapper noticeMapper;
 
     @Override
     public ResponseResult<List<SysNotice>> list() {
         LoginUser loginUser = (LoginUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long tenantId = loginUser.getUser().getTenantId();
-
-        List<SysNotice> list = noticeMapper.selectNoticeMixed(tenantId);
+        List<SysNotice> list = noticeMapper.selectNoticeList();
 
         for(SysNotice sysNotice:list){
             System.out.println();
@@ -50,13 +47,12 @@ public class NoticeServiceImpl implements NoticeService {
         }
 
         // 获取当前在线用户信息
-        User user = loginUser.getUser();
+        SysUser user = loginUser.getUser();
 
 
         // 设置公告创建时间
         notice.setCreateTime(LocalDateTime.now());
         // 插入数据库
-        // 注意：tenant_id 会由我们之前写的 MyMetaObjectHandler 自动填充
         noticeMapper.insert(notice);
 
         return new ResponseResult<>(200, "公告发布成功");
@@ -76,7 +72,7 @@ public class NoticeServiceImpl implements NoticeService {
             }
         }
 
-        // 3. 执行删除（此时多租户插件会拼接 WHERE tenant_id = ?）
+        // 3. 执行删除
         noticeMapper.deleteBatchIds(ids);
         return new ResponseResult<>(200,"删除成功");
     }

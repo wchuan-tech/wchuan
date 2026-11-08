@@ -14,7 +14,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -38,6 +40,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     // 异常处理类
     private final AuthenticationEntryPoint authenticationEntryPoint;
+
+    private SecurityContextHolderStrategy securityContextHolderStrategy =
+            SecurityContextHolder.getContextHolderStrategy();
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -70,7 +75,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         // 存入 SecurityContext
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(loginUser,null,loginUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+        SecurityContext context = this.securityContextHolderStrategy.createEmptyContext();
+        context.setAuthentication(authenticationToken);
+        this.securityContextHolderStrategy.setContext(context);
 
         // 刷新在线时间
         onlineLogService.refreshOnlineUserTime(loginUser);

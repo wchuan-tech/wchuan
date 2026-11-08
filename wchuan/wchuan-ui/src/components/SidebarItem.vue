@@ -45,7 +45,7 @@ const userId = localStorage.getItem('userId')
  * 权限判断：管理员或拥有该标识/子标识的用户可见
  */
 const hasMenuPerm = (menu: any) => {
-  if (userId === '1' || userPermissions.includes('*')) return true
+  if (userId === '1') return true
   if (!menu.perms) return true // 没配权限的默认开放
 
   // 逻辑：用户拥有该权限，或者拥有该权限下级的任何权限（如拥有 system:user:add 就能看 system 目录）

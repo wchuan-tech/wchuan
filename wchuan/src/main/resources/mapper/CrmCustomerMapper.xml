@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wchuan.crm.mapper.CustomerMapper">
+
+    <sql id="selectPrivateCustomerVo">
+        SELECT c.*
+        FROM crm_customer c
+        LEFT JOIN sys_user u ON c.owner_user_id = u.id
+        LEFT JOIN sys_dept d ON u.dept_id = d.id
+    </sql>
+
+    <select id="selectPrivateCustomerPage" resultType="com.wchuan.crm.domain.entity.Customer">
+        <include refid="selectPrivateCustomerVo"/>
+        WHERE c.pool_type = 1
+        <if test="customer.customerName != null and customer.customerName != ''">
+            AND c.customer_name LIKE CONCAT('%', #{customer.customerName}, '%')
+        </if>
+        <if test="customer.phone != null and customer.phone != ''">
+            AND c.phone LIKE CONCAT('%', #{customer.phone}, '%')
+        </if>
+        <if test="customer.customerStage != null and customer.customerStage != ''">
+            AND c.customer_stage = #{customer.customerStage}
+        </if>
+        ${customer.params.dataScope}
+        ORDER BY c.last_followup_time DESC, c.id DESC
+    </select>
+
+    <select id="selectAccessiblePrivateCustomer" resultType="com.wchuan.crm.domain.entity.Customer">
+        <include refid="selectPrivateCustomerVo"/>
+        WHERE c.id = #{customer.id}
+          AND c.pool_type = 1
+        ${customer.params.dataScope}
+        LIMIT 1
+    </select>
+
+    <select id="selectSalesOptions" resultType="com.wchuan.system.domain.entity.SysUser">
+        SELECT u.id, u.dept_id, u.user_name, u.nick_name
+        FROM sys_user u
+        LEFT JOIN sys_dept d ON u.dept_id = d.id
+        WHERE u.del_flag = 0
+          AND u.status = '0'
+        ${customer.params.dataScope}
+        ORDER BY u.nick_name, u.id
+    </select>
+
+    <update id="batchAutoReturnToPool">
+        UPDATE crm_customer
+        SET customer_stage = #{customerStage},
+            pool_type = 0,
+            owner_user_id = NULL,
+            owner_user_name = NULL,
+            update_by = #{updateBy},
+            update_time = #{updateTime}
+        WHERE id IN
+        <foreach collection="customerIds" item="customerId" open="(" separator="," close=")">
+            #{customerId}
+        </foreach>
+          AND pool_type = 1
+          AND lock_status = 0
+          AND last_followup_time &lt; #{cutoffTime}
+    </update>
+
+</mapper>

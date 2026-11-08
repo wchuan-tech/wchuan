@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 
-import {ref, reactive, onMounted, nextTick} from 'vue'
+import {ref, reactive, onMounted,onUnmounted, nextTick} from 'vue'
 import request from '../utils/request'
 import { useRouter } from 'vue-router'
 import {ElMessage, type FormInstance} from 'element-plus'
@@ -109,12 +109,32 @@ const formRules = {
 // 验证码
 const captchaImg = ref('')
 
-// 读取缓存   onMounted 生命周期钩子 中显式调用了 getCaptcha() 函数
+// 4. TS 强类型的键盘（空格 / 回车）监听函数
+const handleKeyDown = (e: KeyboardEvent): void => {
+  // 当按下空格键 (Space) 或 回车键 (Enter) 时触发
+  if (e.code === 'Space' || e.code === 'Enter') {
+    // 如果焦点不在输入框内部，阻止空格键导致页面向下滚动的默认行为
+    if (e.code === 'Space' && (e.target as HTMLElement)?.tagName !== 'INPUT') {
+      e.preventDefault()
+    }
+    // 非加载状态下触发登录
+    if (!loading.value) {
+      handleLogin()
+    }
+  }
+}
+
+// 5. 生命周期钩子
 onMounted(() => {
+  // 读取本地缓存的账号
   const account = localStorage.getItem('userAccount')
   if (account) loginForm.userName = account
 
+  // 获取验证码
   getCaptcha()
+
+  // 绑定全局键盘监听
+  window.addEventListener('keydown', handleKeyDown)
 
   nextTick(() => {
     formRef.value?.clearValidate()
@@ -186,6 +206,10 @@ const handleLogin = async () => {
   }
 }
 
+// 组件销毁时移除监听，防止内存泄漏
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown)
+})
 
 </script>
 

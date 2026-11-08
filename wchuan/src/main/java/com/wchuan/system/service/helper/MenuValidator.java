@@ -1,167 +1,185 @@
 package com.wchuan.system.service.helper;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.wchuan.common.exception.BusinessException;
 import com.wchuan.system.domain.entity.SysMenu;
-import com.wchuan.system.mapper.MenuMapper;
+import com.wchuan.system.mapper.SysMenuMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
-import static com.wchuan.common.constants.MenuConstants.*;
+import static com.wchuan.common.constants.MenuConstants.TYPE_BUTTON;
+import static com.wchuan.common.constants.MenuConstants.TYPE_DIR;
+import static com.wchuan.common.constants.MenuConstants.TYPE_MENU;
 
 @Component
 @RequiredArgsConstructor
 public class MenuValidator {
 
-    // 直接注入 Mapper，彻底切断对 Service 的依赖，消除循环引用
-    private final MenuMapper menuMapper;
+    private static final Set<String> MENU_TYPES = Set.of(TYPE_DIR, TYPE_MENU, TYPE_BUTTON);
+    private static final String PERMISSION_PATTERN =
+            "^[A-Za-z][A-Za-z0-9_-]*(?::[A-Za-z][A-Za-z0-9_-]*)*$";
+    private static final String COMPONENT_PATTERN = "^(?!/)(?!.*\\.\\.)([A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+$";
 
-    /**
-     * 统一校验入口
-     */
+    private final SysMenuMapper menuMapper;
+
     public void validate(SysMenu menu) {
-
-        Long parentId = menu.getParentId();
-
-        // 获取父节点数据（统一查询，减少 DB 压力）
-        SysMenu parent =
-                (parentId != null && parentId != 0L) ? menuMapper.selectById(parentId) : null;
-
-        // 执行各项检验
-        checkSelfAndCircular(menu, parent); // 检查是否自循环
-        checkTypeHierarchy(menu, parent); // 检查类层级
-        checkPermsNamespace(menu, parent); // 检查权限空间
+        normalizeDefaults(menu);
+        validateRequiredFields(menu);
+        SysMenu parent = resolveParent(menu.getParentId());
+        checkCircularReference(menu.getId(), menu.getParentId());
+        checkTypeHierarchy(menu, parent);
+        checkPermission(menu);
+        checkComponent(menu);
+        checkUnique(menu);
     }
 
-    /** 1. 校验逻辑：防止自选和死循环 */
-    private void checkSelfAndCircular(SysMenu menu,SysMenu parent) {
-        Long menuId = menu.getId();
-        Long parentId = menu.getParentId();
-
-        // 检验是否为空即可
-        if (menuId == null || parentId == null) return;
-
-        // 不能选自己作为上级
-        if (menuId.equals(parentId)) {
-            throw new RuntimeException("修改失败，上级菜单不能选择自己");
-        }
-
-        if (parent != null && isIdInPath(menuId.toString(), parent.getAncestors())) {
-            throw new RuntimeException("修改失败，不能将父节点移至子节点下");
-        }
-
+    private void normalizeDefaults(SysMenu menu) {
+        menu.setParentId(menu.getParentId() == null ? 0L : menu.getParentId());
+        menu.setOrderNum(menu.getOrderNum() == null ? 0 : menu.getOrderNum());
+        menu.setStatus(StringUtils.hasText(menu.getStatus()) ? menu.getStatus() : "0");
+        menu.setVisible(StringUtils.hasText(menu.getVisible()) ? menu.getVisible() : "0");
     }
 
-    /** 2. 校验逻辑：M-C-F 结构完整性 */
-    private void checkTypeHierarchy(SysMenu menu,SysMenu parent) {
+    private void validateRequiredFields(SysMenu menu) {
+        if (!StringUtils.hasText(menu.getMenuName())) {
+            throw new BusinessException(400, "菜单名称不能为空");
+        }
+        menu.setMenuName(menu.getMenuName().trim());
+        if (!MENU_TYPES.contains(menu.getMenuType())) {
+            throw new BusinessException(400, "菜单类型必须为M、C或F");
+        }
+        if (!Set.of("0", "1").contains(menu.getStatus())
+                || !Set.of("0", "1").contains(menu.getVisible())) {
+            throw new BusinessException(400, "菜单状态或显示状态不合法");
+        }
+    }
 
-        // 获取当前权限类型
+    private SysMenu resolveParent(Long parentId) {
+        if (parentId == null || parentId == 0L) {
+            return null;
+        }
+        SysMenu parent = menuMapper.selectById(parentId);
+        if (parent == null || "2".equals(parent.getDelFlag())) {
+            throw new BusinessException(404, "上级菜单不存在");
+        }
+        return parent;
+    }
+
+    private void checkCircularReference(Long menuId, Long parentId) {
+        if (menuId == null || parentId == null || parentId == 0L) {
+            return;
+        }
+        Set<Long> visited = new HashSet<>();
+        Long currentId = parentId;
+        while (currentId != null && currentId != 0L) {
+            if (!visited.add(currentId)) {
+                throw new BusinessException(409, "菜单树中已存在循环引用");
+            }
+            if (Objects.equals(menuId, currentId)) {
+                throw new BusinessException(400, "上级菜单不能选择自身或自身的子孙菜单");
+            }
+            SysMenu current = menuMapper.selectById(currentId);
+            if (current == null) {
+                throw new BusinessException(404, "上级菜单不存在");
+            }
+            currentId = current.getParentId();
+        }
+    }
+
+    private void checkTypeHierarchy(SysMenu menu, SysMenu parent) {
         String type = menu.getMenuType();
-
-        // 顶级节点校验
-        if (menu.getParentId() == 0L) {
+        if (parent == null) {
             if (TYPE_BUTTON.equals(type)) {
-                // 自身权限类型为按钮时
-                throw new RuntimeException("操作失败：按钮(F)不能作为顶级节点");
+                throw new BusinessException(400, "按钮不能作为顶级节点");
             }
             return;
         }
-
-        if (parent == null) {
-            throw new RuntimeException("操作失败：上级菜单不存在");
+        if (TYPE_BUTTON.equals(parent.getMenuType())) {
+            throw new BusinessException(400, "按钮下不允许添加子节点");
         }
-
-        String pType = parent.getMenuType();
-
-        if (TYPE_BUTTON.equals(pType)) {
-            // 父权限类型为按钮时
-            throw new RuntimeException("操作失败：按钮下方不允许添加子项");
+        if ((TYPE_DIR.equals(type) || TYPE_MENU.equals(type)) && !TYPE_DIR.equals(parent.getMenuType())) {
+            throw new BusinessException(400, "目录或菜单只能挂载在目录下");
         }
-
-        if ((TYPE_DIR.equals(type) || TYPE_MENU.equals(type)) && !TYPE_DIR.equals(pType)) {
-            // 自身权限类型为菜单时(菜单不能挂载在菜单下面)  或自身权限类型为菜单时但父权限类型不为目录时
-            throw new RuntimeException("操作失败：目录或菜单只能挂载在“目录”下");
+        if (TYPE_BUTTON.equals(type) && !TYPE_MENU.equals(parent.getMenuType())) {
+            throw new BusinessException(400, "按钮必须挂载在页面菜单下");
         }
-
-        if (TYPE_BUTTON.equals(type) && !TYPE_MENU.equals(pType)) {
-            // 自身菜单类型为按钮且父权限类型不为菜单时
-            throw new RuntimeException("操作失败：按钮必须挂载在“菜单”页面下");
-        }
-
     }
 
-    /** 3. 校验逻辑：权限标识命名空间前缀 */
-    private void checkPermsNamespace(SysMenu menu,SysMenu parent) {
-        String perms = menu.getPerms();
-        String type = menu.getMenuType();
-
-        // A. 根节点不参与命名空间校验
-        if (parent == null ||
-                !StringUtils.hasText(parent.getPerms()) ||
-                !StringUtils.hasText(perms))
+    private void checkPermission(SysMenu menu) {
+        String perms = StringUtils.hasText(menu.getPerms()) ? menu.getPerms().trim() : null;
+        menu.setPerms(perms);
+        if ((TYPE_MENU.equals(menu.getMenuType()) || TYPE_BUTTON.equals(menu.getMenuType()))
+                && !StringUtils.hasText(perms)) {
+            throw new BusinessException(400, "菜单或按钮必须配置权限标识");
+        }
+        if (!StringUtils.hasText(perms)) {
             return;
+        }
+        if (perms.contains("*")) {
+            throw new BusinessException(403, "菜单权限标识禁止使用通配符");
+        }
+        if (!perms.matches(PERMISSION_PATTERN)) {
+            throw new BusinessException(400, "权限标识格式不合法");
+        }
+    }
 
-        // B. 菜单和按钮强制要求有权限标识
-        if ((TYPE_MENU.equals(type) || TYPE_BUTTON.equals(type)) && !StringUtils.hasText(perms)) {
-            throw new RuntimeException("操作失败：菜单或功能必须配置权限标识");
+    private void checkComponent(SysMenu menu) {
+        if (TYPE_DIR.equals(menu.getMenuType())) {
+            menu.setComponent(
+                    StringUtils.hasText(menu.getComponent())
+                            ? menu.getComponent().trim()
+                            : null
+            );
+            menu.setPath(
+                    StringUtils.hasText(menu.getPath())
+                            ? menu.getPath().trim()
+                            : ""
+            );
+            return;
+        }
+        if (TYPE_BUTTON.equals(menu.getMenuType())) {
+            menu.setPath("#");
+            menu.setComponent(null);
+            return;
+        }
+        if (!StringUtils.hasText(menu.getPath())) {
+            throw new BusinessException(400, "菜单路由地址不能为空");
+        }
+        if (!StringUtils.hasText(menu.getComponent())) {
+            throw new BusinessException(400, "菜单组件路径不能为空");
+        }
+        menu.setPath(menu.getPath().trim());
+        menu.setComponent(menu.getComponent().trim());
+        if (!menu.getComponent().matches(COMPONENT_PATTERN)) {
+            throw new BusinessException(400, "菜单组件路径格式不合法");
+        }
+    }
+
+    private void checkUnique(SysMenu menu) {
+        Long id = menu.getId() == null ? -1L : menu.getId();
+        Long nameCount = menuMapper.selectCount(new LambdaQueryWrapper<SysMenu>()
+                .eq(SysMenu::getParentId, menu.getParentId())
+                .eq(SysMenu::getMenuName, menu.getMenuName())
+                .ne(SysMenu::getId, id)
+                .and(wrapper -> wrapper.isNull(SysMenu::getDelFlag).or().ne(SysMenu::getDelFlag, "2")));
+        if (nameCount != null && nameCount > 0) {
+            throw new BusinessException(409, "同级菜单名称已存在");
         }
 
-        // C. 前缀对齐校验
-        String prefix = parent.getPerms() + ":";
-        // 如果父级有标识，子级必须以前缀开头（system -> system:user）
-        if (!perms.startsWith(prefix))
-                throw new RuntimeException("权限冲突：标识必须以父级前缀 [" + prefix + "] 开头");
-
-        // D. 深度校验（冒号数量）
-        if (countColons(perms) != countColons(parent.getPerms()) + 1)
-            throw new RuntimeException("规范错误：权限标识层级不符合 M:C:F 结构深度");
-
+        if (!TYPE_BUTTON.equals(menu.getMenuType()) && StringUtils.hasText(menu.getPath())) {
+            Long pathCount = menuMapper.selectCount(new LambdaQueryWrapper<SysMenu>()
+                    .eq(SysMenu::getParentId, menu.getParentId())
+                    .eq(SysMenu::getPath, menu.getPath())
+                    .ne(SysMenu::getId, id)
+                    .and(wrapper -> wrapper.isNull(SysMenu::getDelFlag).or().ne(SysMenu::getDelFlag, "2")));
+            if (pathCount != null && pathCount > 0) {
+                throw new BusinessException(409, "同级路由地址已存在");
+            }
+        }
     }
-
-    private boolean isIdInPath(String menuId,String ancestors){
-        if (!StringUtils.hasText(ancestors)) return false;
-        return Arrays.asList(ancestors.split(",")).contains(menuId);
-    }
-
-    /**
-     * 计算字符串中冒号的数量
-     */
-    private long countColons(String str) {
-        if (str == null) return 0;
-        return str.chars().filter(ch -> ch == ':').count();
-    }
-
-
-//    /**
-//     * 判断 parentId 是否是 menuId 的子孙节点
-//     */
-//    private boolean isChild(Long menuId, Long parentId) {
-//        // 查出全量菜单数据进行递归比对
-//        List<SysMenu> menuList = menuMapper.selectList(null);
-//        List<Long> childIds = new ArrayList<>();
-//
-//        // 递归填充 childIds 集合
-//        fillChildIds(menuList, menuId, childIds);
-//
-//        return childIds.contains(parentId);
-//    }
-//
-//    /**
-//     * 递归辅助：获取某个菜单下的所有子孙ID
-//     */
-//    private void fillChildIds(List<SysMenu> list, Long menuId, List<Long> childIds) {
-//        for (SysMenu menu : list) {
-//            // 如果某条记录的父ID等于我们要查的那个ID，说明它是子项
-//            if (Objects.equals(menu.getParentId(), menuId)) {
-//                childIds.add(menu.getId());
-//                // 继续向下递归寻找它的后代
-//                fillChildIds(list, menu.getId(), childIds);
-//            }
-//        }
-//    }
-
 }

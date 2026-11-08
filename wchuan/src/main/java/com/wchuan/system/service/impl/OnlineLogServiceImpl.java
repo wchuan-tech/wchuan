@@ -4,7 +4,7 @@ import com.wchuan.common.utils.RedisCache;
 import com.wchuan.common.utils.WebUtils;
 import com.wchuan.system.domain.vo.LoginUser;
 import com.wchuan.system.domain.entity.SysUserOnlineLog;
-import com.wchuan.system.mapper.OnlineLogMapper;
+import com.wchuan.system.mapper.SysOnlineLogMapper;
 import com.wchuan.system.service.OnlineLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +21,7 @@ import static com.wchuan.common.enums.RedisKeyEnum.ONLINE_USER_LOG_KEY;
 @RequiredArgsConstructor
 public class OnlineLogServiceImpl implements OnlineLogService {
 
-    private final OnlineLogMapper onlineLogMapper;
+    private final SysOnlineLogMapper onlineLogMapper;
 
     private final RedisCache redisCache;
 

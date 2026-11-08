@@ -4,10 +4,12 @@ import com.wchuan.common.utils.CaptchaUtils;
 import com.wchuan.system.domain.dto.LoginRequest;
 import com.wchuan.system.domain.vo.LoginUser;
 import com.wchuan.system.domain.dto.ResponseResult;
+import com.wchuan.system.mapper.SysRoleMapper;
 import com.wchuan.system.service.LoginService;
 import com.wchuan.system.service.OnlineLogService;
 import com.wchuan.system.service.TokenService;
 import com.wchuan.common.utils.RedisCache;
+import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.wchuan.common.constants.Constants.SESSION_TTL;
+import static com.wchuan.common.constants.Constants.TOKEN_TTL;
 import static com.wchuan.common.enums.RedisKeyEnum.LOGIN_TOKEN_KEY;
 
 @Service
@@ -36,6 +38,9 @@ public class LoginServiceImpl implements LoginService {
 
     private final CaptchaUtils captchaUtils;
 
+    @Resource
+    private SysRoleMapper roleMapper;
+
     @Override
     public ResponseResult<?> login(LoginRequest loginRequest) {
         // 1. 验证码校验（建议封装成工具类）
@@ -48,10 +53,10 @@ public class LoginServiceImpl implements LoginService {
         try{
             authentication = authenticationManager.authenticate(authenticationToken);
         }catch (Exception e){
+            e.printStackTrace();
             throw new RuntimeException("LoginImpl:用户名或密码错误");
         }
-        // 认证成功 将用户信息存入 LoginUser 中
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // 认证成功 将用户信息存入 LoginUser
         LoginUser loginUser = (LoginUser) authentication.getPrincipal();
         System.out.println("loginUserAuthorities:" + loginUser.getAuthorities());
         // 通过登陆用户创建token
@@ -59,7 +64,7 @@ public class LoginServiceImpl implements LoginService {
         // 获取用户id
         String userId = loginUser.getUser().getId().toString();
         // 设置用户登陆信息时间
-        redisCache.setCacheObject(LOGIN_TOKEN_KEY + userId, loginUser,SESSION_TTL, TimeUnit.MINUTES);
+        redisCache.setCacheObject(LOGIN_TOKEN_KEY + userId, loginUser,TOKEN_TTL, TimeUnit.MINUTES);
 
         // 创建用户在线时间日志
         onlineLogService.createOnlineLog(loginUser);

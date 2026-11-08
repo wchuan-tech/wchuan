@@ -19,6 +19,16 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.time.LocalDateTime;
 
+/**
+ * 操作日志切面。
+ *
+ * <p>通过 {@code @Around} 拦截标注了 {@link Log} 的方法，采集操作人、请求信息、耗时、异常等，
+ * 并交由 {@link AsyncLogService} 异步落库，避免阻塞主业务线程。
+ *
+ * @author WChuan
+ * @see Log
+ * @see AsyncLogService
+ */
 @Aspect
 @Component
 @Slf4j
@@ -28,8 +38,17 @@ public class LogAspect {
     private final AsyncLogService asyncLogService; // 1. 注入异步服务类
 
     /**
-     * joinPoint AOP 执行上下文 包含方法名、类名、参数、执行权限
-     * controller 注解 (@Log) 的实例 在注解里写的 title、businessType 等
+     * 环绕通知：包裹目标方法执行，统计耗时并记录操作日志。
+     *
+     * <p><b>为什么用 {@code @Around}：</b>需要同时拿到“返回值、异常、耗时”，
+     * 只有环绕通知能完整包裹方法执行前后；{@code @Before}/{@code @After} 做不到。
+     *
+     * @param joinPoint     {@link ProceedingJoinPoint}：{@link JoinPoint} 的子接口，
+     *                      在被拦截方法执行前/后可获取上下文（方法签名、参数、目标对象），
+     *                      并通过 {@link ProceedingJoinPoint#proceed()} 执行目标方法。
+     * @param controllerLog 被拦截方法上的 {@link Log} 注解实例，提供 title / businessType。
+     * @return 目标方法的返回值
+     * @throws Throwable 目标方法抛出的异常，原样向上抛出（不吞异常）
      */
     @Around("@annotation(controllerLog)")
     public Object doAround(ProceedingJoinPoint joinPoint, Log controllerLog) throws Throwable {
@@ -50,11 +69,21 @@ public class LogAspect {
             throw e;
         } finally {
             long costTime = System.currentTimeMillis() - startTime;
-            // 记录日志入库
+            // 记录日志入库（finally 保证成功/异常都会记录）
             handleLog(joinPoint, controllerLog, exception, costTime);
         }
     }
 
+    /**
+     * 组装并异步保存操作日志。
+     *
+     * @param joinPoint     {@link JoinPoint}：被拦截方法的上下文；
+     *                      此处通过 {@code getSignature().getName()} 获取方法名。
+     *                      注意：{@code @Around} 传入的 {@link ProceedingJoinPoint} 是其子接口，可直接传入。
+     * @param controllerLog {@link Log} 注解实例
+     * @param e             目标方法抛出的异常（正常执行时为 {@code null}）
+     * @param costTime      目标方法耗时（毫秒）
+     */
     private void handleLog(JoinPoint joinPoint, Log controllerLog, Exception e, long costTime) {
         try {
             SysOperLog sysOperLog = new SysOperLog();
@@ -86,7 +115,7 @@ public class LogAspect {
             sysOperLog.setTitle(controllerLog.title());
             sysOperLog.setBusinessType(controllerLog.businessType());
 
-            // 5. joinPoint.getTarget() 获取被拦截的类对象信息 方法名、参数等
+            // 5. 通过 joinPoint.getSignature() 获取被拦截方法的签名，取出方法名
             String methodName = joinPoint.getSignature().getName();
             sysOperLog.setMethod(methodName);
 
@@ -98,7 +127,7 @@ public class LogAspect {
                 sysOperLog.setStatus(0); // 正常
             }
 
-            // 7. 插入数据库
+            // 7. 异步插入数据库（@Async → 线程池 → TaskDecorator 传递 SecurityContext）
             asyncLogService.saveLog(sysOperLog);
         } catch (Exception exp) {
             log.error("日志记录异常: {}", exp.getMessage());

@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-@MapperScan("com.wchuan.system.mapper")
+@MapperScan({"com.wchuan.system.mapper", "com.wchuan.crm.mapper"})
 @EnableAsync
 @EnableScheduling
 public class WchuanApplication {
